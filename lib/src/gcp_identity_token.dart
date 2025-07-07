@@ -17,31 +17,31 @@ class GcpIdTokenClient {
   /// Whether to use Application Default Credentials (ADC) or Metadata server.
   final bool useADC;
 
-  String? _currentToken;
+  final _currentTokens = <String, String>{};
 
   /// Retrieves the current GCP identity token.
-  String? get currentToken => _currentToken;
-
-  DateTime? _tokenExpiry;
+  String? getCurrentToken(String audience) => _currentTokens[audience];
 
   /// Returns the GCP identity token for the given audience.
   /// If [useADC] is true, it will use Application Default Credentials (ADC).
   /// If [useADC] is false, it will use Metadata server to retrieve token.
   Future<String> getIdToken({required String audience}) async {
     // If we have a token and it's not expired, return it
-    if (_currentToken != null && _tokenExpiry != null) {
-      final now = DateTime.now().toUtc();
+    if (_currentTokens.containsKey(audience)) {
+      final now = DateTime.now();
+      final token = _currentTokens[audience]!;
+      final expiry = Jwt.getExpiryDate(token)!;
+      
       // Add a small buffer (e.g., 1 minute) to avoid using a token that's about to expire
-      if (now.isBefore(_tokenExpiry!.subtract(const Duration(minutes: 1)))) {
-        return _currentToken!;
+      if (now.isBefore(expiry.subtract(const Duration(minutes: 1)))) {
+        return token;
       }
     }
 
     // Fetch a new token and cache it
     final token = useADC ? await _getIdTokenFromADC() : await _getIdTokenFromMetadataServer(audience);
 
-    _currentToken = token;
-    _tokenExpiry = Jwt.getExpiryDate(token);
+    _currentTokens[audience] = token;
 
     return token;
   }
