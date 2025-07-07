@@ -1,0 +1,18 @@
+name: gcp_identity_token
+description: A Dart package that provides seamless Google Cloud Platform (GCP) identity token retrieval and caching with automatic environment detection.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: ^3.8.0
+
+dependencies:
+  googleapis_auth: ^2.0.0
+  http: ^1.4.0
+  jwt_decode: ^0.3.1
+
+
+dev_dependencies:
+  mocktail: ^1.0.4
+  test: ^1.26.2
+  very_good_analysis: ^9.0.0
